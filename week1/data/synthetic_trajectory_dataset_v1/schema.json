@@ -1,0 +1,52 @@
+{
+  "name": "synthetic_trajectory_dataset_v1",
+  "description": "Toy ego-trajectory prediction dataset for week-1 E2E planning practice.",
+  "splits": {
+    "train": 10000,
+    "test": 2000
+  },
+  "dt_s": 0.1,
+  "history": {
+    "key": "history",
+    "shape": [
+      10,
+      2
+    ],
+    "meaning": "Past ego positions in ego-centric frame, meters. Last history point is near [0, 0]."
+  },
+  "future": {
+    "key": "future",
+    "shape": [
+      20,
+      2
+    ],
+    "meaning": "Future ego positions in same ego-centric frame, meters."
+  },
+  "label": {
+    "key": "label",
+    "shape": [],
+    "mapping": {
+      "0": "straight",
+      "1": "left_turn",
+      "2": "right_turn",
+      "3": "accelerate",
+      "4": "decelerate"
+    }
+  },
+  "files": {
+    "train/trajectories.npz": [
+      "history",
+      "future",
+      "label",
+      "label_names"
+    ],
+    "train/metadata.csv": "sample_id, split, traj_type, label, generation parameters",
+    "test/trajectories.npz": [
+      "history",
+      "future",
+      "label",
+      "label_names"
+    ],
+    "test/metadata.csv": "sample_id, split, traj_type, label, generation parameters"
+  }
+}
