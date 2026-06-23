@@ -1,0 +1,69 @@
+{
+  "name": "week2_synthetic_scene_dataset_v1",
+  "description": "Scene-aware synthetic trajectory prediction dataset with ego state, route goal, and surrounding agents.",
+  "coordinate_frame": "ego-centric; current ego pose is [0, 0], +x points roughly forward, units are meters",
+  "dt_s": 0.1,
+  "splits": {
+    "train": 12000,
+    "test": 2400
+  },
+  "scenario_type_mapping": {
+    "0": "straight_clear",
+    "1": "left_turn",
+    "2": "right_turn",
+    "3": "follow_vehicle",
+    "4": "obstacle_avoidance",
+    "5": "cross_traffic"
+  },
+  "arrays": {
+    "ego_history": {
+      "shape": [
+        10,
+        2
+      ],
+      "description": "Past ego positions [x, y]. Last point is [0, 0]."
+    },
+    "ego_state": {
+      "shape": [
+        4
+      ],
+      "description": "[speed_mps, yaw_rad, accel_mps2, curvature_1pm]."
+    },
+    "goal": {
+      "shape": [
+        2
+      ],
+      "description": "Route or local target point [x, y]."
+    },
+    "agents": {
+      "shape": [
+        8,
+        5
+      ],
+      "description": "Padded surrounding agents [x, y, vx, vy, radius]."
+    },
+    "agent_mask": {
+      "shape": [
+        8
+      ],
+      "description": "1 for valid agent rows, 0 for padding rows."
+    },
+    "future": {
+      "shape": [
+        20,
+        2
+      ],
+      "description": "Future ego trajectory [x, y]."
+    },
+    "scenario_type": {
+      "shape": [],
+      "description": "Integer scenario id."
+    }
+  },
+  "files": {
+    "train/samples.npz": "training arrays",
+    "train/metadata.csv": "human-readable sample metadata",
+    "test/samples.npz": "test arrays",
+    "test/metadata.csv": "human-readable sample metadata"
+  }
+}
