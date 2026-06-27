@@ -19,7 +19,7 @@ class MLPDataset(Dataset):
         self.scenario_names = data["scenario_names"]
 
     def __len__(self):
-        return len(self.history)
+        return len(self.ego_history)
 
     def __getitem__(self, idx):
         return {

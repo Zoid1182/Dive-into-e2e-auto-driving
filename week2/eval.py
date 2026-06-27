@@ -4,8 +4,11 @@ import matplotlib.pyplot as plt
 import torch
 from torch.utils.data import DataLoader
 from data.dataset import MLPDataset
-from models.mlp import TrajMLP
+from models.scene_mlp import SceneMLP
 from utils.metrics import ade, fde
+
+def move_to_device(batch, device):
+    return {key: value.to(device, non_blocking=True) for key, value in batch.items()}
 
 
 @torch.no_grad()
@@ -19,11 +22,12 @@ def evaluate(model, dataloader, device):
     all_cases = []
 
     for batch in dataloader:
-        history = batch["history"].to(device)
+        history = batch["ego_history"].to(device)
         future = batch["future"].to(device)
-        label = batch["label"]
+        label = batch["scenario_type"]
+        batch = move_to_device(batch, device)
 
-        pred = model(history)
+        pred = model(batch)
 
         batch_size = history.shape[0]
         total_ade += ade(pred, future).item() * batch_size
@@ -74,8 +78,7 @@ def plot_case(history, future, pred, save_path, title=""):
         label="pred future",
     )
 
-    plt.scatter(history[-1, 0], history[-1, 1],
-                c="black", s=60, label="current")
+    plt.scatter(history[-1, 0], history[-1, 1], c="black", s=60, label="current")
     plt.axis("equal")
     plt.grid(True)
     plt.legend()
@@ -114,15 +117,16 @@ def main():
 
     dataset = MLPDataset(args.data_root, split="test")
     dataloader = DataLoader(
-        dataset=dataset,
-        batch_size=args.batch_size,
-        shuffle=False,
-        num_workers=0,
+        dataset, batch_size=args.batch_size, shuffle=False, num_workers=0
     )
-    model = TrajMLP(
+    model = SceneMLP(
         history_len=10,
         future_len=20,
+        max_agents=8,
+        agent_dim=5,
+        ego_state_dim=4,
         hidden_dim=128,
+        dropout=0.1,
     ).to(device)
 
     checkpoint = torch.load(args.checkpoint, map_location=device)
@@ -133,7 +137,7 @@ def main():
     print(f"Test FDE: {results['fde']:.4f} m")
 
     save_dir = Path(args.save_dir)
-    label_names = dataset.label_names
+    label_names = dataset.scenario_names
 
     vis_count = 0
 
@@ -155,13 +159,9 @@ def main():
             case_ade = ade(pred.unsqueeze(0), future.unsqueeze(0)).item()
             case_fde = fde(pred.unsqueeze(0), future.unsqueeze(0)).item()
 
-            title = (
-                f"{label_names[label]} | "
-                f"ADE={case_ade:.3f}m, FDE={case_fde:.3f}m"
-            )
+            title = f"{label_names[label]} | ADE={case_ade:.3f}m, FDE={case_fde:.3f}m"
 
-            save_path = save_dir / \
-                f"case_{vis_count:03d}_{label_names[label]}.png"
+            save_path = save_dir / f"case_{vis_count:03d}_{label_names[label]}.png"
             plot_case(history, future, pred, save_path, title)
 
             vis_count += 1
