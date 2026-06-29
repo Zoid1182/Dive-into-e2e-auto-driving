@@ -1,0 +1,2 @@
+week3/data/self_driving_car_dataset_jungle filter=lfs diff=lfs merge=lfs -text
+week3/data/self_driving_car_dataset_make filter=lfs diff=lfs merge=lfs -text
